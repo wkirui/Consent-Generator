@@ -1,7 +1,6 @@
 import streamlit as st
 import json
 import os
-import pickle
 
 st.image("static/ipa.png")
 
@@ -20,7 +19,7 @@ def load_project_info(filename):
         with open(filename) as fr:
             existing_project_details = json.load(fr)
     except  Exception as e:
-        st.write(e)
+        pass
     return existing_project_details
 
 
@@ -30,19 +29,8 @@ def save_to_file(filename,project_data):
         with open(filename,"w") as fr:
             fr.write(json.dumps(project_data))
             fr.close()
-                # current_content = json.load(fr)
-                # if len(current_content)>0:
-                #     updated_content = {**current_content,**project_data}
-                # fr.close()
     except Exception as e:
-        # updated_content = project_data
-        st.write(e)
-        # pass
-    # if updated_content is not None:
-    #     with open(filename,'w') as fw:
-    #         fw.write(json.dumps(updated_content))
-    #         fw.close()
-
+        pass
 def project_details_page(session_state):
     st.title("General Study Information")
     st.write("")
@@ -153,11 +141,8 @@ def project_details_page(session_state):
 
 # project details file
 filename = "data/input/submitted_project_details.txt"
-# check if file exists and load existing information
-# check_file_exists(filename, session_state)
-# existing_project_details = load_project_info(filename)
 project_details = project_details_page(session_state)
-
+st.write(project_details)
 save_to_file(filename,project_details)
 
 col1, col2,col3,col4 = st.columns(4)

@@ -1,7 +1,6 @@
 import streamlit as st
 import json
-import pandas as pd
-from io import StringIO
+
 st.image("static/ipa.png")
 
 session_state = st.session_state
