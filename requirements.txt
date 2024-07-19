@@ -1,3 +1,7 @@
 streamlit
 openai
 pillow
+python-dotenv
+streamlit-pdf-viewer
+markdown-pdf
+Markdown2docx
