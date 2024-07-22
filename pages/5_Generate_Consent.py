@@ -9,8 +9,6 @@ from openai import OpenAI
 from markdown_pdf import MarkdownPdf, Section
 from Markdown2docx import Markdown2docx
 
-from dotenv import load_dotenv
-
 
 st.image("static/ipa.png")
 st.write("")
@@ -23,10 +21,9 @@ def save_to_file(filename, content):
 
     
 # create openAI client API
-load_dotenv()
-organization = os.getenv("ORGANIZATION")
-project = os.getenv("PROJECT")
-api_key = os.getenv("API_KEY")
+organization = st.secrets["ORGANIZATION"]
+project = st.secrets["PROJECT"]
+api_key = st.secrets["API_KEY"]
 
 client = OpenAI(
     organization = organization,
@@ -72,12 +69,15 @@ base64_image9 = encode_image("templates/page9.png")
 # to preview pdf
 @st.experimental_dialog("Consent Template Draft", width="large")
 def displayPDF(file):
+    
     # Opening file from file path
-    with open(file, "rb") as f:
-        base64_pdf = base64.b64encode(f.read()).decode('utf-8')
-
+    # with open(file, "rb") as f:
+    #     base64_pdf = base64.b64encode(f.read()).decode('utf-8')
+    
     # Embedding PDF in HTML
-    pdf_display = F'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="800" type="application/pdf"></iframe>'
+    # pdf_display = F'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="800" type="application/pdf"></iframe>'
+    pdf_display = f'<iframe src="https://ipa-consent-generator.streamlit.app/Generate_Consent/{file}" width="100%" height="800" type="application/pdf"></iframe>'
+
     # Displaying File
     st.markdown(pdf_display, unsafe_allow_html=True)
 

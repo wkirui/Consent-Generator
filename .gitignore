@@ -1,3 +1,4 @@
 .env
 *.ipynb
-test/
+tests/
+.streamlit/secrets.toml
