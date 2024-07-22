@@ -5,3 +5,4 @@ python-dotenv
 streamlit-pdf-viewer
 markdown-pdf
 Markdown2docx
+markdown

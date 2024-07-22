@@ -142,7 +142,6 @@ def project_details_page(session_state):
 # project details file
 filename = "data/input/submitted_project_details.txt"
 project_details = project_details_page(session_state)
-st.write(project_details)
 save_to_file(filename,project_details)
 
 col1, col2,col3,col4 = st.columns(4)
