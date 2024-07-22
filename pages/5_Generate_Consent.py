@@ -71,15 +71,16 @@ base64_image9 = encode_image("templates/page9.png")
 def displayPDF(file):
     
     # Opening file from file path
-    # with open(file, "rb") as f:
-    #     base64_pdf = base64.b64encode(f.read()).decode('utf-8')
-    
-    # Embedding PDF in HTML
-    # pdf_display = F'<iframe src="data:application/pdf;base64,{base64_pdf}" width="100%" height="800" type="application/pdf"></iframe>'
-    pdf_display = f'<iframe src="https://ipa-consent-generator.streamlit.app/Generate_Consent/{file}" width="100%" height="800" type="application/pdf"></iframe>'
+    with open(file, "rb") as f:
+        pdf_doc = f.read()
 
-    # Displaying File
-    st.markdown(pdf_display, unsafe_allow_html=True)
+    with st.container(height=700):
+        pdf_viewer_content = pdf_viewer(file,rendering="unwrap",width=700,height=700)
+        
+        col1, col2,col3,col4 = st.columns(4)
+        with col4:
+            st.download_button(":green[Download]", data=pdf_doc,
+                               file_name="consent_draft.pdf", mime="application/octet-stream")
 
 
 def generate_consent_draft(client,system_message, user_message, project_details):
