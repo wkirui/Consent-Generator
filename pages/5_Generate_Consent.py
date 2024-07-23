@@ -13,6 +13,9 @@ from Markdown2docx import Markdown2docx
 st.image("static/ipa.png")
 st.write("")
 
+# define session state
+session_state = st.session_state
+
 # save content to file                      
 def save_to_file(filename, content):
     with open(filename,'w') as fw:
@@ -68,22 +71,22 @@ base64_image9 = encode_image("templates/page9.png")
 
 # to preview pdf
 @st.experimental_dialog("Consent Template Draft", width="large")
-def displayPDF(file):
+def displayPDF(pdf_file, docx_file):
     
     # Opening file from file path
-    with open(file, "rb") as f:
+    with open(docx_file, "rb") as f:
         pdf_doc = f.read()
 
     with st.container(height=700):
-        pdf_viewer_content = pdf_viewer(file,rendering="unwrap",width=700,height=700)
+        pdf_viewer_content = pdf_viewer(pdf_file,rendering="unwrap",width=700,height=700)
         
         col1, col2,col3,col4 = st.columns(4)
-        with col4:
+        with col3:
             st.download_button(":green[Download]", data=pdf_doc,
-                               file_name="consent_draft.pdf", mime="application/octet-stream")
+                               file_name="consent_draft.docx", mime="text/plain")
 
 
-def generate_consent_draft(client,system_message, user_message, project_details):
+def generate_consent_draft(client,system_message, user_message,submitted_study_data):
     response = client.chat.completions.create(
         model="gpt-4o",
         messages=[
@@ -96,7 +99,7 @@ def generate_consent_draft(client,system_message, user_message, project_details)
                 "role":"user",
                 "content": [
                     {"type":"text","text":user_message},
-                    {"type":"text","text":str(project_details)},
+                    {"type":"text","text":str(submitted_study_data)},
                     {"type":"image_url","image_url":{"url":f"data:image/jpeg;base64,{base64_image0}"}},
                     {"type":"image_url","image_url":{"url":f"data:image/jpeg;base64,{base64_image1}"}},
                     {"type":"image_url","image_url":{"url":f"data:image/jpeg;base64,{base64_image2}"}},
@@ -115,15 +118,24 @@ def generate_consent_draft(client,system_message, user_message, project_details)
     consent_draft_content = response.choices[0].message.content
     return consent_draft_content
 
-def create_consent_draft(project_details):
+def create_consent_draft(example_project_details,submitted_study_data):
     with st.spinner("Working on your draft..."):
-        # time.sleep(3)
-        
+
         # api call to generate draft
-        # template_draft_content = generate_consent_draft(client,
-        #                                                 system_message,
-        #                                                 user_message,
-        #                                                 project_details)
+        num_values_submitted = len([x for x in submitted_study_data.values()])
+        original_filename = "data/output/original_api_output.txt"
+        if num_values_submitted > 40:    
+            template_draft_content = generate_consent_draft(client,
+                                                        system_message,
+                                                        user_message,
+                                                        submitted_study_data)
+            # save api output
+            save_to_file(original_filename,template_draft_content)
+            
+        else:
+            st.write(":red[You did not provide enough details, the following is a sample draft!]")
+            with open(original_filename,'r') as f:
+                template_draft_content = f.read()
         
         st.write("Based on the information provided, I have generated \
             the following consent template draft for your project. \
@@ -132,11 +144,7 @@ def create_consent_draft(project_details):
                         You can :red[Regenerate] the draft if you're not happy with the draft.")
         st.write("")
          
-        # save original output
-        original_filename = "data/output/original_api_output.txt"
-        # save_to_file(original_filename,template_draft_content)
-        with open(original_filename,'r') as f:
-            template_draft_content = f.read()
+
         
         # save original content to pdf
         html_response = markdown.markdown(template_draft_content,output_format="html")
@@ -185,13 +193,25 @@ def create_consent_draft(project_details):
             pdf_doc = MarkdownPdf()
             pdf_doc.add_section(Section(html_doc,toc=False),
                                 user_css=template_css)
-            pdf_doc.save("data/output/Consent Template Draft_Final.pdf")
+            pdf_doc.save("data/output/Consent_Template_Draft_Final.pdf")
 
-# load updated 
+# load submitted data
+# serialize session state values
+session_vals = [x for x in session_state.values()]
+session_keys = [x for x in session_state.keys()]
+session_fields_dict = dict(zip(session_keys,session_vals))
+
+submitted_study_data = {}
+for k, v in submitted_study_data.items():
+    if v:
+        session_fields_dict[k] = v
+        
+
+# load saved data
 with open("data/input/submitted_project_details.txt") as f:
-    project_details = json.load(f)
+    example_project_details = json.load(f)
 
-create_consent_draft(project_details)
+create_consent_draft(example_project_details, submitted_study_data)
 
 col1, col2,col3,col4 = st.columns(4)
 with col1:
@@ -206,5 +226,6 @@ with col4:
     preview_button =  st.button(":green[Preview & Download]")
     if preview_button:
         # preview pdf
-        output_file = "data/output/Consent Template Draft_Final.pdf"
-        displayPDF(output_file)
+        pdf_output_file = "data/output/Consent_Template_Draft_Final.pdf"
+        docx_output_file = "data/output/updated_api_output_md.docx"
+        displayPDF(pdf_output_file, docx_output_file)
