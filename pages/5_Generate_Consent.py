@@ -124,7 +124,7 @@ def create_consent_draft(example_project_details,submitted_study_data):
         # api call to generate draft
         num_values_submitted = len([x for x in submitted_study_data.values()])
         original_filename = "data/output/original_api_output.txt"
-        if num_values_submitted > 40:    
+        if num_values_submitted > 20:    
             template_draft_content = generate_consent_draft(client,
                                                         system_message,
                                                         user_message,
